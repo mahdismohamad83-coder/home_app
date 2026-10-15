@@ -1,4 +1,4 @@
-name: Build flutter APK
+name: Build Flutter APK
 
 on:
   push:
@@ -18,19 +18,21 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up flutter
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
+        working-directory: ./home_app
 
       - name: Build APK
         run: flutter build apk --release
+        working-directory: ./home_app
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: home_app/build/app/outputs/flutter-apk/app-release.apk
