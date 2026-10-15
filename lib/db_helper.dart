@@ -34,7 +34,6 @@ class DBHelper {
   }
 
   static Future<List<Map<String, dynamic>>> searchItems(String query) async {
-    final db = acid? _database; // Wait, let's keep the correct code
     final db = await database;
     return await db.query(
       'items',
