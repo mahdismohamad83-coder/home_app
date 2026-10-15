@@ -29,12 +29,32 @@ jobs:
       - name: Generate Android platform files
         run: flutter create . --platforms=android
 
-      - name: Ensure assets/images/logo.png exists
+      - name: Ensure logo.png and fix pubspec config
         run: |
           mkdir -p assets/images
+          # ساخت تصویر پیش‌فرض در صورت نبودن
           if [ ! -f "assets/images/logo.png" ]; then
             python3 -c "import base64; f=open('assets/images/logo.png','wb'); f.write(base64.b64decode(b'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')); f.close()"
           fi
+
+          # اصلاح خودکار pubspec.yaml برای جلوگیری از خطای iOS و تنظیم دقیق آیکون
+          python3 -c "
+          import os
+          path = 'pubspec.yaml'
+          if os.path.exists(path):
+              with open(path, 'r', encoding='utf-8') as f:
+                  content = f.read()
+              
+              # اگر تنظیمات لانچر آیکون نبود، اضافه اش کن
+              if 'flutter_launcher_icons:' not in content:
+                  content += '\nflutter_launcher_icons:\n  android: true\n  ios: false\n  image_path: \"assets/images/logo.png\"\n  adaptive_icon_background: \"#222222\"\n  adaptive_icon_foreground: \"assets/images/logo.png\"\n'
+              else:
+                  # غیرفعال کردن بخش iOS برای جلوگیری از خطا روی لینوکس
+                  content = content.replace('ios: true', 'ios: false')
+              
+              with open(path, 'w', encoding='utf-8') as f:
+                  f.write(content)
+          "
 
       - name: Install dependencies
         run: flutter pub get
