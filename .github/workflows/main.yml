@@ -9,11 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    # این قسمت مشخص می‌کند که تمام دستورات باید داخل پوشه اصلی پروژه اجرا شوند
-    defaults:
-      run:
-        working-directory: home_app
 
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +26,16 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Generate Android platform files
+        run: flutter create . --platforms=android
+
+      - name: Ensure assets/images/logo.png exists
+        run: |
+          mkdir -p assets/images
+          if [ ! -f "assets/images/logo.png" ]; then
+            python3 -c "import base64; f=open('assets/images/logo.png','wb'); f.write(base64.b64decode(b'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')); f.close()"
+          fi
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -44,4 +49,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: home_app/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
