@@ -1,196 +1,211 @@
 import 'package:flutter/material.dart';
-import 'db_helper.dart';
 
 void main() {
-  runApp(const HomeItemFinderApp());
+  runApp(const KojasApp());
 }
 
-class HomeItemFinderApp extends StatelessWidget {
-  const HomeItemFinderApp({super.key});
+class KojasApp extends StatelessWidget {
+  const KojasApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF7A1C3E);
-    const backgroundColor = Color(0xFFFAF6F7);
-
     return MaterialApp(
-      title: 'ردیاب هوشمند وسایل',
+      title: 'کجاست؟',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: backgroundColor,
-        primaryColor: primaryColor,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: primaryColor,
-          primary: primaryColor,
-          surface: Colors.white,
+          seedColor: const Color(0xFF990033),
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: true,
-          titleTextStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-          elevation: 4,
-        ),
+        scaffoldBackgroundColor: const Color(0xFFFFF0F3), // پس‌زمینه کیوت و روشن
       ),
-      home: const HomeScreen(),
+      home: const MainScreen(),
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class ItemModel {
+  String id;
+  String name;
+  String location;
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ItemModel({required this.id, required this.name, required this.location});
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, dynamic>> _items = [];
-  final TextEditingController _searchController = TextEditingController();
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  void initState() {
-    super.initState();
-    _loadAllItems();
-  }
+  State<MainScreen> createState() => _MainScreenState();
+}
 
-  void _loadAllItems() async {
-    final data = await DBHelper.getAllItems();
+class _MainScreenState extends State<MainScreen> {
+  // لیست نمونه وسایل ثبت شده
+  final List<ItemModel> _items = [
+    ItemModel(id: '1', name: 'لباس مجلسی', location: 'کمد اتاق خواب'),
+    ItemModel(id: '2', name: 'لباس ورزشی', location: 'کشوی دوم دراور'),
+    ItemModel(id: '3', name: 'سوئیچ ماشین', location: 'روی میز جاکفشی'),
+    ItemModel(id: '4', name: 'کارت ملی', location: 'کیف چرمی قهوه‌ای'),
+  ];
+
+  void _addItem(String name, String location) {
     setState(() {
-      _items = data;
+      _items.add(ItemModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: name,
+        location: location,
+      ));
     });
   }
 
-  void _searchItems(String query) async {
-    if (query.isEmpty) {
-      _loadAllItems();
-      return;
-    }
-    final data = await DBHelper.searchItems(query);
+  void _deleteItem(String id) {
     setState(() {
-      _items = data;
+      _items.removeWhere((item) => item.id == id);
     });
   }
 
-  void _showAddItemDialog() {
-    final nameController = TextEditingController();
-    final locationController = TextEditingController();
-    final detailsController = TextEditingController();
-    const primaryColor = Color(0xFF7A1C3E);
+  void _editItem(String id, String newName, String newLocation) {
+    setState(() {
+      final index = _items.indexWhere((item) => item.id == id);
+      if (index != -1) {
+        _items[index].name = newName;
+        _items[index].location = newLocation;
+      }
+    });
+  }
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          top: 24,
-          left: 24,
-          right: 24,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF5F7),
+      appBar: AppBar(
+        title: const Text(
+          'کجاست؟ 🏡❓',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
+        backgroundColor: const Color(0xFF990033),
+        centerTitle: true,
+        elevation: 4,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: const [
-                  Icon(Icons.bookmark_add_rounded, color: primaryColor, size: 28),
-                  SizedBox(width: 10),
-                  Text(
-                    'ثبت وسیله جدید در انبار خانه',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: primaryColor,
+              // بنر خوش‌آمدگویی کیوت
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF990033), Color(0xFFCC3366)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.pink.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    )
+                  ],
+                ),
+                child: const Column(
+                  children: [
+                    Text(
+                      'وسایلت کجاست؟ گم شدی؟ 🤔',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: 'نام وسیله (مثلاً کیف زرشکی)',
-                  prefixIcon: const Icon(Icons.shopping_bag_outlined, color: primaryColor),
-                  filled: true,
-                  fillColor: const Color(0xFFFAF6F7),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: locationController,
-                decoration: InputDecoration(
-                  labelText: 'محل قرارگیری (مثلاً کمد سوم، طبقه دوم)',
-                  prefixIcon: const Icon(Icons.place_outlined, color: primaryColor),
-                  filled: true,
-                  fillColor: const Color(0xFFFAF6F7),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: detailsController,
-                decoration: InputDecoration(
-                  labelText: 'توضیحات تکمیلی (مثلاً داخل کیسه سبز رنگ)',
-                  prefixIcon: const Icon(Icons.info_outline, color: primaryColor),
-                  filled: true,
-                  fillColor: const Color(0xFFFAF6F7),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                    SizedBox(height: 8),
+                    Text(
+                      'به راحتی پیداشون کن و جای همه‌چیز رو یادت بمونه!',
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                      textAlign: TextAlign.center,
                     ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+
+              // بخش جستجوی هوشمند با پیشنهاد خودکار حروف
+              const Text(
+                'جستجوی سریع وسیله 🔍',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF660022)),
+              ),
+              const SizedBox(height: 10),
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (textEditingValue.text == '') {
+                    return const Iterable<String>.empty();
+                  }
+                  return _items
+                      .map((e) => e.name)
+                      .where((name) => name.contains(textEditingValue.text));
+                },
+                onSelected: (String selection) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('انتخاب شد: $selection')),
+                  );
+                },
+                fieldViewBuilder:
+                    (context, textController, focusNode, onFieldSubmitted) {
+                  return TextField(
+                    controller: textController,
+                    focusNode: focusNode,
+                    decoration: InputDecoration(
+                      hintText: 'مثلا بنویس لباس یا سوئیچ...',
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: const Icon(Icons.search, color: Color(0xFF990033)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Color(0xFFFCD5CE)),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 40),
+
+              // دکمه انتقال به صفحه لیست وسایل
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ItemListScreen(
+                        items: _items,
+                        onDelete: _deleteItem,
+                        onEdit: _editItem,
+                        onAdd: _addItem,
+                      ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF990033),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  onPressed: () async {
-                    if (nameController.text.isNotEmpty &&
-                        locationController.text.isNotEmpty) {
-                      await DBHelper.insertItem({
-                        'name': nameController.text.trim(),
-                        'location': locationController.text.trim(),
-                        'details': detailsController.text.trim(),
-                      });
-                      Navigator.pop(ctx);
-                      _loadAllItems();
-                    }
-                  },
-                  child: const Text(
-                    'ذخیره در حافظه خانه',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  elevation: 5,
+                ),
+                icon: const Icon(Icons.list_alt_rounded, size: 26),
+                label: const Text(
+                  'برای دیدن لیست وسایل ضربه بزنید 📋',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -199,154 +214,140 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
+
+// صفحه دوم: لیست وسایل با قابلیت ویرایش و حذف
+class ItemListScreen extends StatefulWidget {
+  final List<ItemModel> items;
+  final Function(String) onDelete;
+  final Function(String, String, String) onEdit;
+  final Function(String, String) onAdd;
+
+  const ItemListScreen({
+    super.key,
+    required this.items,
+    required this.onDelete,
+    required this.onEdit,
+    required this.onAdd,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF7A1C3E);
+  State<ItemListScreen> createState() => _ItemListScreenState();
+}
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('جای وسایل کجاست؟ 🔍'),
-      ),
-      body: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Column(
+class _ItemListScreenState extends State<ItemListScreen> {
+  void _showAddOrEditDialog({ItemModel? item}) {
+    final nameController = TextEditingController(text: item?.name ?? '');
+    final locationController = TextEditingController(text: item?.location ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(item == null ? 'افزودن وسیله جدید ✨' : 'ویرایش وسیله ✏️'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.all(20.0),
-              decoration: const BoxDecoration(
-                color: primaryColor,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: _searchItems,
-                style: const TextStyle(color: Colors.black87),
-                decoration: InputDecoration(
-                  hintText: 'سرچ کن چی کجاست... (مثلا کیف زرشکی)',
-                  hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
-                  prefixIcon: const Icon(Icons.search_rounded, color: primaryColor),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'نام وسیله'),
             ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: _items.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.inventory_2_outlined, size: 70, color: Colors.grey[400]),
-                          const SizedBox(height: 15),
-                          Text(
-                            'هنوز وسیله‌ای ثبت نکرده‌ای!',
-                            style: TextStyle(fontSize: 16, color: Colors.grey[600], fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            'با دکمه پایین صفحه اولین وسیله رو اضافه کن.',
-                            style: TextStyle(fontSize: 13, color: Colors.grey[400]),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: _items.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      itemBuilder: (ctx, index) {
-                        final item = _items[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: primaryColor.withOpacity(0.06),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            leading: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: primaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(Icons.checkroom_rounded, color: primaryColor),
-                            ),
-                            title: Text(
-                              item['name'],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.only(top: 6.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.place, size: 14, color: primaryColor),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          'مکان: ${item['location']}',
-                                          style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w500),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  if (item['details'] != null && item['details'].isNotEmpty) ...[
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.info, size: 14, color: Colors.grey),
-                                        const SizedBox(width: 4),
-                                        Expanded(
-                                          child: Text(
-                                            'جزئیات: ${item['details']}',
-                                            style: const TextStyle(color: Colors.grey),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
-                              onPressed: () async {
-                                await DBHelper.deleteItem(item['id']);
-                                _loadAllItems();
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+            TextField(
+              controller: locationController,
+              decoration: const InputDecoration(labelText: 'جایگاه نگهداری'),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('لغو', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF990033),
+                foregroundColor: Colors.white),
+            onPressed: () {
+              if (nameController.text.isNotEmpty &&
+                  locationController.text.isNotEmpty) {
+                if (item == null) {
+                  widget.onAdd(nameController.text, locationController.text);
+                } else {
+                  widget.onEdit(
+                      item.id, nameController.text, locationController.text);
+                }
+                Navigator.pop(context);
+                setState(() {});
+              }
+            },
+            child: const Text('ذخیره'),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAddItemDialog,
-        icon: const Icon(Icons.add),
-        label: const Text('افزودن وسیله', style: TextStyle(fontWeight: FontWeight.bold)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF5F7),
+      appBar: AppBar(
+        title: const Text('لیست وسایل ثبت‌شده',
+            style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF990033),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: widget.items.isEmpty
+          ? const Center(
+              child: Text('هنوز هیچ وسیله‌ای ثبت نشده! 🌸',
+                  style: TextStyle(color: Colors.grey, fontSize: 16)),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: widget.items.length,
+              itemBuilder: (context, index) {
+                final item = widget.items[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 2,
+                  child: ListTile(
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    title: Text(
+                      item.name,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    subtitle: Text('جایگاه: ${item.location}',
+                        style: const TextStyle(color: Colors.black54)),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                          onPressed: () => _showAddOrEditDialog(item: item),
+                        ),
+                        IconButton(
+                          icon:
+                              const Icon(Icons.delete, color: Colors.redAccent),
+                          onPressed: () {
+                            widget.onDelete(item.id);
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF990033),
+        foregroundColor: Colors.white,
+        onPressed: () => _showAddOrEditDialog(),
+        child: const Icon(Icons.add),
       ),
     );
   }
