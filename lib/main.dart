@@ -17,7 +17,7 @@ class KojasApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF990033),
         ),
-        scaffoldBackgroundColor: const Color(0xFFFFF0F3), // پس‌زمینه کیوت و روشن
+        scaffoldBackgroundColor: const Color(0xFFFFF0F3),
       ),
       home: const MainScreen(),
     );
@@ -40,7 +40,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // لیست نمونه وسایل ثبت شده
   final List<ItemModel> _items = [
     ItemModel(id: '1', name: 'لباس مجلسی', location: 'کمد اتاق خواب'),
     ItemModel(id: '2', name: 'لباس ورزشی', location: 'کشوی دوم دراور'),
@@ -93,7 +92,6 @@ class _MainScreenState extends State<MainScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // بنر خوش‌آمدگویی کیوت
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -130,8 +128,6 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-
-              // بخش جستجوی هوشمند با پیشنهاد خودکار حروف
               const Text(
                 'جستجوی سریع وسیله 🔍',
                 style: TextStyle(
@@ -177,8 +173,6 @@ class _MainScreenState extends State<MainScreen> {
                 },
               ),
               const SizedBox(height: 40),
-
-              // دکمه انتقال به صفحه لیست وسایل
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.push(
@@ -216,7 +210,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-// صفحه دوم: لیست وسایل با قابلیت ویرایش و حذف
 class ItemListScreen extends StatefulWidget {
   final List<ItemModel> items;
   final Function(String) onDelete;
