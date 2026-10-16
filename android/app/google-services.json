@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "274305667483",
+    "project_id": "kojastapp-c5512",
+    "storage_bucket": "kojastapp-c5512.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:274305667483:android:b4b11f737cd4b7cb28113e",
+        "android_client_info": {
+          "package_name": "com.example.home_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW5A0BjuCPphNNcEtiIssWE2lyBMhmESk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
