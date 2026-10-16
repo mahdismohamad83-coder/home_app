@@ -57,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
       id: '2',
       name: 'لباس ورزشی',
       location: 'کشوی دوم دراور',
-      description: 'ست ستوسی و گرمکن',
+      description: 'ست طوسی و گرمکن',
     ),
     ItemModel(
       id: '3',
@@ -101,7 +101,6 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  // پاپ‌آپ نمایش اطلاعات وسیله سرچ‌شده
   void _showItemDetailsDialog(ItemModel item) {
     showDialog(
       context: context,
@@ -126,6 +125,7 @@ class _MainScreenState extends State<MainScreen> {
             const Divider(),
             const SizedBox(height: 8),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('📍 جایگاه: ',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF990033))),
@@ -136,7 +136,7 @@ class _MainScreenState extends State<MainScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('📝 توضیحات تکمیلی: ',
+                const Text('📝 توضیحات: ',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF990033))),
                 Expanded(
                   child: Text(
@@ -336,7 +336,7 @@ class _MainScreenState extends State<MainScreen> {
 class ItemListScreen extends StatefulWidget {
   final List<ItemModel> items;
   final Function(String) onDelete;
-  final Function(String, String, String) onEdit;
+  final Function(String, String, String, String) onEdit;
   final Function(String, String, String) onAdd;
   final Function(ItemModel) onShowDetails;
 
