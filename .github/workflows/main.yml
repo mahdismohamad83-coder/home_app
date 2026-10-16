@@ -10,11 +10,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # این قسمت باعث می‌شود تمام دستورات مستقیماً داخل پوشه پروژه اجرا شوند
-    defaults:
-      run:
-        working-directory: home_app
-
     steps:
       - uses: actions/checkout@v4
 
@@ -90,4 +85,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: home_app/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
