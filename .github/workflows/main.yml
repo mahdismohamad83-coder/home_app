@@ -29,36 +29,23 @@ jobs:
       - name: Generate Android platform files
         run: flutter create . --platforms=android
 
-      - name: Ensure logo.png and fix configurations
+      - name: Ensure logo.png and configure App Name safely
         run: |
           mkdir -p assets/images
           if [ ! -f "assets/images/logo.png" ]; then
             python3 -c "import base64; f=open('assets/images/logo.png','wb'); f.write(base64.b64decode(b'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')); f.close()"
           fi
 
-          # تنظیمات پکیج آیکون
+          # اسکریپت ضدخطا برای تغییر نام برنامه به «کجاست؟»
           python3 -c "
           import os
-          path = 'pubspec.yaml'
-          if os.path.exists(path):
-              with open(path, 'r', encoding='utf-8') as f:
-                  content = f.read()
-              if 'flutter_launcher_icons:' not in content:
-                  content += '\nflutter_launcher_icons:\n  android: true\n  ios: false\n  image_path: \"assets/images/logo.png\"\n  adaptive_icon_background: \"#222222\"\n  adaptive_icon_foreground: \"assets/images/logo.png\"\n'
-              else:
-                  content = content.replace('ios: true', 'ios: false')
-              with open(path, 'w', encoding='utf-8') as f:
-                  f.write(content)
-          "
 
-          # تنظیم نام برنامه به «کجاست؟»
-          python3 -c "
-          import os
           m_path = 'android/app/src/main/AndroidManifest.xml'
           if os.path.exists(m_path):
               with open(m_path, 'r', encoding='utf-8') as f:
                   c = f.read()
               c = c.replace('android:label=\"home_app\"', 'android:label=\"کجاست؟\"')
+              c = c.replace('android:label=\"kojast_app\"', 'android:label=\"کجاست؟\"')
               c = c.replace('android:label=\"@string/app_name\"', 'android:label=\"کجاست؟\"')
               with open(m_path, 'w', encoding='utf-8') as f:
                   f.write(c)
@@ -68,6 +55,7 @@ jobs:
               with open(s_path, 'r', encoding='utf-8') as f:
                   c = f.read()
               c = c.replace('home_app', 'کجاست؟')
+              c = c.replace('kojast_app', 'کجاست؟')
               with open(s_path, 'w', encoding='utf-8') as f:
                   f.write(c)
           "
