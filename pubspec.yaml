@@ -1,5 +1,5 @@
 name: kojast_app
-description: "برنامه هوشمند پیدا کردن وسایل منزل - کجاست؟"
+description: "Kojast App"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -11,19 +11,14 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # پکیج‌های فایربیس و احراز هویت
   firebase_core: ^2.24.2
   firebase_auth: ^4.15.3
   google_sign_in: ^6.1.6
   cloud_firestore: ^4.13.6
 
-  # پکیج خواندن صوتی (Text-to-Speech)
-  flutter_tts: ^3.8.5
-
-  # پکیج ثبت عکس با دوربین
+  text_to_speech: ^0.2.8
   image_picker: ^1.0.4
 
-  # آیکون‌های متریال
   cupertino_icons: ^1.0.6
 
 dev_dependencies:
@@ -32,9 +27,13 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   flutter_launcher_icons: ^0.13.1
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+
 flutter:
   uses-material-design: true
 
-  # مسیر لوگوی برنامه
   assets:
     - assets/images/logo.png
