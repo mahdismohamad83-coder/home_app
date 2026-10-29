@@ -25,24 +25,6 @@ jobs:
           flutter-version: '3.24.2'
           channel: 'stable'
 
-      - name: Regenerate Android & Force Compatible Gradle
-        run: |
-          if [ -f "android/app/google-services.json" ]; then
-            cp android/app/google-services.json /tmp/google-services.json
-          fi
-          rm -rf android
-          flutter create . --platforms=android --org com.example
-          mkdir -p android/app
-          if [ -f "/tmp/google-services.json" ]; then
-            cp /tmp/google-services.json android/app/google-services.json
-          fi
-          mkdir -p android/gradle/wrapper
-          echo "distributionBase=GRADLE_USER_HOME" > android/gradle/wrapper/gradle-wrapper.properties
-          echo "distributionPath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
-          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.3-bin.zip" >> android/gradle/wrapper/gradle-wrapper.properties
-          echo "zipStoreBase=GRADLE_USER_HOME" >> android/gradle/wrapper/gradle-wrapper.properties
-          echo "zipStorePath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
-
       - name: Install dependencies
         run: flutter pub get
 
