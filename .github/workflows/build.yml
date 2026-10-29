@@ -22,10 +22,10 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.2'
+          flutter-version: '3.19.6'
           channel: 'stable'
 
-      - name: Configure Gradle and AGP Compatibility
+      - name: Set Gradle 7.6.3 Wrapper
         run: |
           mkdir -p android/gradle/wrapper
           echo "distributionBase=GRADLE_USER_HOME" > android/gradle/wrapper/gradle-wrapper.properties
@@ -33,15 +33,6 @@ jobs:
           echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.3-bin.zip" >> android/gradle/wrapper/gradle-wrapper.properties
           echo "zipStoreBase=GRADLE_USER_HOME" >> android/gradle/wrapper/gradle-wrapper.properties
           echo "zipStorePath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
-
-          if [ -f "android/build.gradle" ]; then
-            sed -i 's/7\.[0-9]\+\.[0-9]\+/7.4.2/g' android/build.gradle
-            sed -i 's/8\.[0-9]\+\.[0-9]\+/7.4.2/g' android/build.gradle
-          fi
-          if [ -f "android/settings.gradle" ]; then
-            sed -i 's/7\.[0-9]\+\.[0-9]\+/7.4.2/g' android/settings.gradle
-            sed -i 's/8\.[0-9]\+\.[0-9]\+/7.4.2/g' android/settings.gradle
-          fi
 
       - name: Install dependencies
         run: flutter pub get
