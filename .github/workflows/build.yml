@@ -25,14 +25,17 @@ jobs:
           flutter-version: '3.24.2'
           channel: 'stable'
 
-      - name: Fix V1 Embedding Error
-        run: |
-          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
-            sed -i 's/android:name="io.flutter.app.FlutterApplication"//g' android/app/src/main/AndroidManifest.xml
-          fi
-
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Force Gradle 7.6.3 Lock
+        run: |
+          mkdir -p android/gradle/wrapper
+          echo "distributionBase=GRADLE_USER_HOME" > android/gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.3-bin.zip" >> android/gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> android/gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
