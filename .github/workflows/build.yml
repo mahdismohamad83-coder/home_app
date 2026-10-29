@@ -22,7 +22,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.24.2'
           channel: 'stable'
 
       - name: Clean and Recreate Android Project
@@ -37,8 +37,8 @@ jobs:
             cp /tmp/google-services.json android/app/google-services.json
           fi
 
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Upgrade Dependencies to Latest Stable
+        run: flutter pub upgrade
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
