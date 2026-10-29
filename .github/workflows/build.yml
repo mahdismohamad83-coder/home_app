@@ -25,6 +25,12 @@ jobs:
           flutter-version: '3.24.2'
           channel: 'stable'
 
+      - name: Fix Gradle Build Script
+        run: |
+          if [ -f "android/build.gradle.kts" ]; then
+            echo "" > android/build.gradle.kts
+          fi
+
       - name: Install dependencies
         run: flutter pub get
 
