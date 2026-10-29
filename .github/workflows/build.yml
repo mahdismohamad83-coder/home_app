@@ -37,8 +37,12 @@ jobs:
             cp /tmp/google-services.json android/app/google-services.json
           fi
 
-      - name: Upgrade Dependencies to Latest Stable
-        run: flutter pub upgrade
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Fix Missing Namespace for text_to_speech
+        run: |
+          find ~/.pub-cache -path "*/text_to_speech-*/android/build.gradle" -exec sed -i '/android {/a \    namespace "net.mikespub.flutter.plugins.texttospeech"' {} \;
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
