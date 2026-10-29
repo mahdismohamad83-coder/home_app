@@ -25,6 +25,12 @@ jobs:
           flutter-version: '3.24.2'
           channel: 'stable'
 
+      - name: Fix V1 Embedding Error
+        run: |
+          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
+            sed -i 's/android:name="io.flutter.app.FlutterApplication"//g' android/app/src/main/AndroidManifest.xml
+          fi
+
       - name: Install dependencies
         run: flutter pub get
 
