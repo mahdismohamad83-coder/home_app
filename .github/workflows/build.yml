@@ -40,13 +40,21 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Bulletproof Namespace Injection for text_to_speech
+      - name: Comprehensive Fix for Gradle 8 and Legacy Plugins
         run: |
-          echo "Searching and patching text_to_speech build.gradle..."
-          find $HOME/.pub-cache -type f -name "build.gradle" | grep "text_to_speech" | while read file; do
-            if ! grep -q "namespace" "$file"; then
-              echo "Injecting namespace into $file"
-              sed -i '/android {/a \    namespace "net.mikespub.flutter.plugins.texttospeech"' "$file"
+          echo "Patching .module to .create in pub-cache and android..."
+          find ~/.pub-cache -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
+          find android -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
+
+          echo "Fixing text_to_speech namespace and kotlin version..."
+          find ~/.pub-cache -type d -name "text_to_speech-*" | while read dir; do
+            gradle_file="$dir/android/build.gradle"
+            if [ -f "$gradle_file" ]; then
+              if ! grep -q "namespace" "$gradle_file"; then
+                sed -i '/android {/a \    namespace "net.mikespub.flutter.plugins.texttospeech"' "$gradle_file"
+              fi
+              sed -i 's/1\.3\.50/1.8.22/g' "$gradle_file"
+              sed -i 's/kotlin-gradle-plugin:[0-9.]\+/kotlin-gradle-plugin:1.8.22/g' "$gradle_file"
             fi
           done
 
