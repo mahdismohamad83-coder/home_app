@@ -37,11 +37,36 @@ jobs:
             cp /tmp/google-services.json android/app/google-services.json
           fi
 
-      - name: Completely Remove text_to_speech and Clean Code
+      - name: Safely Remove text_to_speech via Python
         run: |
-          sed -i '/text_to_speech/d' pubspec.yaml
-          find lib -type f -name "*.dart" -exec sed -i '/text_to_speech/d' {} +
-          find lib -type f -name "*.dart" -exec sed -i '/TextToSpeech/d' {} +
+          python3 -c '
+          import glob, os
+
+          if os.path.exists("pubspec.yaml"):
+              with open("pubspec.yaml", "r", encoding="utf-8") as f:
+                  lines = f.readlines()
+              with open("pubspec.yaml", "w", encoding="utf-8") as f:
+                  for line in lines:
+                      if "text_to_speech" not in line:
+                          f.write(line)
+
+          for filepath in glob.glob("lib/**/*.dart", recursive=True):
+              with open(filepath, "r", encoding="utf-8") as f:
+                  content = f.read()
+              
+              lines = content.splitlines()
+              new_lines = []
+              for line in lines:
+                  if "text_to_speech" in line:
+                      continue
+                  if ".speak(" in line or "TextToSpeech" in line:
+                      new_lines.append("// " + line + " // removed")
+                  else:
+                      new_lines.append(line)
+              
+              with open(filepath, "w", encoding="utf-8") as f:
+                  f.write("\n".join(new_lines) + "\n")
+          '
           flutter pub get
 
       - name: Build APK
