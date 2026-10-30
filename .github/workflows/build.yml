@@ -37,12 +37,12 @@ jobs:
             cp /tmp/google-services.json android/app/google-services.json
           fi
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Purge Problematic text_to_speech Package from Cache
+      - name: Remove Problematic text_to_speech from pubspec.yaml
         run: |
-          rm -rf ~/.pub-cache/hosted/*/text_to_speech-*
+          # حذف خط مربوط به پکیج صوتی از فایل pubspec.yaml تا دیگر بارگذاری نشود
+          sed -i '/text_to_speech:/d' pubspec.yaml
+          # حذف کامنت یا خطوط احتمالی وابسته در صورت وجود
+          flutter pub get
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
