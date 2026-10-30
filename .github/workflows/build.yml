@@ -40,10 +40,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Global Patch for Gradle 8 Module Method
+      - name: Fix Gradle 8 and text_to_speech Namespace
         run: |
           find ~/.pub-cache -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
-          find android -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
+          find ~/.pub-cache -type f -path "*/text_to_speech-*/android/build.gradle" | while read file; do
+            if ! grep -q "namespace" "$file"; then
+              sed -i '/android {/a \    namespace "net.mikespub.flutter.plugins.texttospeech"' "$file"
+            fi
+          done
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
