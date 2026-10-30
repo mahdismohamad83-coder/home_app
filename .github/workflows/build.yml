@@ -40,9 +40,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Patch .module Method for Gradle 8 Compatibility
+      - name: Force Inject Namespace into text_to_speech
         run: |
-          find ~/.pub-cache -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
+          TTS_PATH=$(find ~/.pub-cache -type d -name "text_to_speech-*" | head -n 1)
+          if [ -d "$TTS_PATH" ]; then
+            GRADLE_FILE="$TTS_PATH/android/build.gradle"
+            if [ -f "$GRADLE_FILE" ]; then
+              if ! grep -q "namespace" "$GRADLE_FILE"; then
+                echo "" >> "$GRADLE_FILE"
+                echo "android { namespace 'net.mikespub.flutter.plugins.texttospeech' }" >> "$GRADLE_FILE"
+              fi
+            fi
+          fi
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
