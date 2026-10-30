@@ -22,7 +22,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.5'
+          flutter-version: '3.24.2'
           channel: 'stable'
 
       - name: Clean and Recreate Android Project
@@ -40,17 +40,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Fix SDK 34 and text_to_speech Kotlin Version
+      - name: Global Patch for Gradle 8 Module Method
         run: |
-          # تنظیم compileSdk روی 34 برای پکیج image_picker
-          if [ -f "android/app/build.gradle" ]; then
-            sed -i 's/compileSdk [0-9]\+/compileSdk 34/g' android/app/build.gradle
-            sed -i 's/compileSdkVersion [0-9]\+/compileSdkVersion 34/g' android/app/build.gradle
-          fi
-
-          # اصلاح نسخه‌ی کاتلین پکیج text_to_speech از 1.3.50 به 1.8.22
-          find ~/.pub-cache -path "*/text_to_speech-*/android/build.gradle" -exec sed -i 's/1\.3\.50/1.8.22/g' {} \;
-          find ~/.pub-cache -path "*/text_to_speech-*/android/build.gradle" -exec sed -i 's/kotlin-gradle-plugin:[0-9]\+\.[0-9]\+\.[0-9]\+/kotlin-gradle-plugin:1.8.22/g' {} \;
+          find ~/.pub-cache -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
+          find android -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
