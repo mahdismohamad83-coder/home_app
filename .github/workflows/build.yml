@@ -40,15 +40,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK and Patch Gradle 8 Module Method
+      - name: Bulletproof Namespace Injection for text_to_speech
         run: |
-          # اجرای بیلد در پس‌زمینه یا پایش لحظه‌ای برای اصلاح متد `.module` پس از بازنویسی خودکار فلاتر
-          flutter build apk --release --no-tree-shake-icons || {
-            echo "Attempting post-error patch for .module method..."
-            find ~/.pub-cache -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
-            find . -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
-            flutter build apk --release --no-tree-shake-icons
-          }
+          echo "Searching and patching text_to_speech build.gradle..."
+          find $HOME/.pub-cache -type f -name "build.gradle" | grep "text_to_speech" | while read file; do
+            if ! grep -q "namespace" "$file"; then
+              echo "Injecting namespace into $file"
+              sed -i '/android {/a \    namespace "net.mikespub.flutter.plugins.texttospeech"' "$file"
+            fi
+          done
+
+      - name: Build APK
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
