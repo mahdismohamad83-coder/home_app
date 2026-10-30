@@ -22,10 +22,10 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.2'
+          flutter-version: '3.16.5'
           channel: 'stable'
 
-      - name: Clean and Recreate Android Project
+      - name: Clean and Recreate Android Project with Gradle 7.5
         run: |
           if [ -f "android/app/google-services.json" ]; then
             cp android/app/google-services.json /tmp/google-services.json
@@ -36,16 +36,14 @@ jobs:
           if [ -f "/tmp/google-services.json" ]; then
             cp /tmp/google-services.json android/app/google-services.json
           fi
+          
+          # تنظیم گریدل روی نسخه ۷.۵ برای سازگاری صددرصدی با پکیج‌های صوتی قدیمی
+          if [ -f "android/gradle/wrapper/gradle-wrapper.properties" ]; then
+            sed -i 's/gradle-[0-9.]\+-bin.zip/gradle-7.5-bin.zip/g' android/gradle/wrapper/gradle-wrapper.properties
+          fi
 
-      - name: Purge text_to_speech completely
-        run: |
-          # حذف از pubspec.yaml
-          sed -i '/text_to_speech/d' pubspec.yaml
-          
-          # پاکسازی تمام خطوط کدهای دارت که به این پکیج اشاره دارند
-          find lib -type f -name "*.dart" -exec sed -i '/text_to_speech/d' {} +
-          
-          flutter pub get
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
