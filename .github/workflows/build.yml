@@ -37,11 +37,14 @@ jobs:
             cp /tmp/google-services.json android/app/google-services.json
           fi
 
-      - name: Remove Problematic text_to_speech from pubspec.yaml
+      - name: Purge text_to_speech completely
         run: |
-          # حذف خط مربوط به پکیج صوتی از فایل pubspec.yaml تا دیگر بارگذاری نشود
-          sed -i '/text_to_speech:/d' pubspec.yaml
-          # حذف کامنت یا خطوط احتمالی وابسته در صورت وجود
+          # حذف از pubspec.yaml
+          sed -i '/text_to_speech/d' pubspec.yaml
+          
+          # پاکسازی تمام خطوط کدهای دارت که به این پکیج اشاره دارند
+          find lib -type f -name "*.dart" -exec sed -i '/text_to_speech/d' {} +
+          
           flutter pub get
 
       - name: Build APK
