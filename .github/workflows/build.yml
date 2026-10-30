@@ -40,16 +40,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Fix text_to_speech Namespace
+      - name: Patch .module Method for Gradle 8 Compatibility
         run: |
-          find ~/.pub-cache -name "text_to_speech*" -type d | while read dir; do
-            gradle_file="$dir/android/build.gradle"
-            if [ -f "$gradle_file" ]; then
-              if ! grep -q "namespace" "$gradle_file"; then
-                sed -i '/android {/a \    namespace "net.mikespub.flutter.plugins.texttospeech"' "$gradle_file"
-              fi
-            fi
-          done
+          find ~/.pub-cache -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
