@@ -40,30 +40,38 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Fix Gradle 8, Namespace, and Kotlin JVM Target
+      - name: Fix Gradle 8 .module Issue via Python
         run: |
-          find ~/.pub-cache -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
-          find android -type f \( -name "*.gradle" -o -name "*.groovy" -o -name "*.kts" \) -exec sed -i 's/\.module(/\.create(/g' {} +
-          
-          find ~/.pub-cache -type f \( -name "*.gradle" -o -name "*.kts" \) -exec sed -i 's/1\.3\.50/1.8.22/g' {} +
-          find ~/.pub-cache -type f \( -name "*.gradle" -o -name "*.kts" \) -exec sed -i 's/kotlin-gradle-plugin:[0-9.]\+/kotlin-gradle-plugin:1.8.22/g' {} +
-          
-          find ~/.pub-cache -type f -path "*/text_to_speech-*/android/build.gradle" | while read file; do
-            if ! grep -q "namespace" "$file"; then
-              sed -i '/android {/a \    namespace "net.mikespub.flutter.plugins.texttospeech"' "$file"
-            fi
-          done
+          python3 -c '
+          import glob, re
 
-          if [ -f "android/build.gradle" ]; then
-            echo "
-            subprojects {
-                tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-                    kotlinOptions {
-                        jvmTarget = '1.8'
-                    }
-                }
-            }" >> android/build.gradle
-          fi
+          for filepath in glob.glob("/home/runner/.pub-cache/**/*.gradle", recursive=True):
+              with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                  content = f.read()
+              
+              original = content
+              content = re.sub(r"\bmodule\s*\(", "create(", content)
+              
+              if content != original:
+                  with open(filepath, "w", encoding="utf-8") as f:
+                      f.write(content)
+
+          for filepath in glob.glob("/home/runner/.pub-cache/**/text_to_speech-*/android/build.gradle", recursive=True):
+              with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                  content = f.read()
+              if "namespace" not in content:
+                  content = content.replace("android {", "android {\n    namespace \"net.mikespub.flutter.plugins.texttospeech\"")
+              content = content.replace("1.3.50", "1.8.22")
+              with open(filepath, "w", encoding="utf-8") as f:
+                  f.write(content)
+
+          for filepath in glob.glob("/home/runner/.pub-cache/**/text_to_speech-*/android/src/main/AndroidManifest.xml", recursive=True):
+              with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                  content = f.read()
+              content = re.sub(r"package=\"[^\"]*\"", "", content)
+              with open(filepath, "w", encoding="utf-8") as f:
+                  f.write(content)
+          '
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
