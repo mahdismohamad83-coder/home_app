@@ -25,7 +25,7 @@ jobs:
           flutter-version: '3.16.5'
           channel: 'stable'
 
-      - name: Clean and Recreate Android Project
+      - name: Clean and Setup Gradle 7.5
         run: |
           if [ -f "android/app/google-services.json" ]; then
             cp android/app/google-services.json /tmp/google-services.json
@@ -37,15 +37,20 @@ jobs:
             cp /tmp/google-services.json android/app/google-services.json
           fi
 
+          # Force Gradle 7.5 for full compatibility with plugins
+          if [ -f "android/gradle/wrapper/gradle-wrapper.properties" ]; then
+            sed -i 's/distributionUrl=.*$/distributionUrl=https\:\/\/services.gradle.org\/distributions\/gradle-7.5-bin.zip/g' android/gradle/wrapper/gradle-wrapper.properties
+          fi
+
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Fix Kotlin Version and SDK for Plugins (Safe Python Script)
+      - name: Fix SDK 34 and Kotlin Compatibility (Python)
         run: |
           python3 -c '
-          import glob, re, os
+          import os, re, glob
 
-          # 1. Set compileSdk to 34 in app build.gradle
+          # 1. Set compileSdk to 34
           for path in ["android/app/build.gradle", "android/app/build.gradle.kts"]:
               if os.path.exists(path):
                   with open(path, "r", encoding="utf-8") as f:
@@ -55,27 +60,15 @@ jobs:
                   with open(path, "w", encoding="utf-8") as f:
                       f.write(content)
 
-          # 2. Fix Kotlin version in text_to_speech and add namespace if needed
-          for filepath in glob.glob("/home/runner/.pub-cache/**/text_to_speech-*/android/build.gradle", recursive=True):
+          # 2. Fix Kotlin version in pub-cache if needed
+          for filepath in glob.glob("/home/runner/.pub-cache/**/*.gradle", recursive=True):
               try:
                   with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
                       content = f.read()
-                  content = content.replace("1.3.50", "1.8.22")
-                  if "android {" in content and "namespace" not in content:
-                      content = content.replace("android {", "android {\n    namespace \"net.mikespub.flutter.plugins.texttospeech\"")
-                  with open(filepath, "w", encoding="utf-8") as f:
-                      f.write(content)
-              except Exception:
-                  pass
-
-          # 3. Remove package attribute from plugin Manifests
-          for manifest_path in glob.glob("/home/runner/.pub-cache/**/text_to_speech-*/android/src/main/AndroidManifest.xml", recursive=True):
-              try:
-                  with open(manifest_path, "r", encoding="utf-8") as f:
-                      content = f.read()
-                  content = re.sub(r"package=\"[^\"]*\"", "", content)
-                  with open(manifest_path, "w", encoding="utf-8") as f:
-                      f.write(content)
+                  if "1.3.50" in content:
+                      content = content.replace("1.3.50", "1.8.22")
+                      with open(filepath, "w", encoding="utf-8") as f:
+                          f.write(content)
               except Exception:
                   pass
           '
