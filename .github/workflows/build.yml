@@ -40,35 +40,29 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Fix CompileSdk and text_to_speech Kotlin Version
+      - name: Fix Gradle 8 .module Issue Globally
         run: |
           python3 -c '
-          import glob, re, os
+          import glob, re
 
-          app_gradle = "android/app/build.gradle"
-          if os.path.exists(app_gradle):
-              with open(app_gradle, "r", encoding="utf-8") as f:
-                  content = f.read()
-              content = re.sub(r"compileSdkVersion\s+\d+", "compileSdkVersion 34", content)
-              content = re.sub(r"compileSdk\s*=\s*\d+", "compileSdk = 34", content)
-              with open(app_gradle, "w", encoding="utf-8") as f:
-                  f.write(content)
+          files = glob.glob("/home/runner/.pub-cache/**/*.gradle", recursive=True) + \
+                  glob.glob("/home/runner/.pub-cache/**/*.kts", recursive=True) + \
+                  glob.glob("android/**/*.gradle", recursive=True) + \
+                  glob.glob("android/**/*.kts", recursive=True)
 
-          for filepath in glob.glob("/home/runner/.pub-cache/**/text_to_speech-*/android/build.gradle", recursive=True):
-              with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-                  content = f.read()
-              content = content.replace("1.3.50", "1.8.22")
-              if "namespace" not in content:
-                  content = content.replace("android {", "android {\n    namespace \"net.mikespub.flutter.plugins.texttospeech\"")
-              with open(filepath, "w", encoding="utf-8") as f:
-                  f.write(content)
-
-          for filepath in glob.glob("/home/runner/.pub-cache/**/text_to_speech-*/android/src/main/AndroidManifest.xml", recursive=True):
-              with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-                  content = f.read()
-              content = re.sub(r"package=\"[^\"]*\"", "", content)
-              with open(filepath, "w", encoding="utf-8") as f:
-                  f.write(content)
+          for filepath in files:
+              try:
+                  with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                      content = f.read()
+                  
+                  original = content
+                  content = re.sub(r"\bmodule\s*\(", "create(", content)
+                  
+                  if content != original:
+                      with open(filepath, "w", encoding="utf-8") as f:
+                          f.write(content)
+              except Exception as e:
+                  pass
           '
 
       - name: Build APK
