@@ -22,36 +22,20 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.2'
+          flutter-version: '3.16.5'
           channel: 'stable'
 
-      - name: Permanently Remove text_to_speech
+      - name: Clean and Recreate Android Project
         run: |
-          python3 -c '
-          import glob, os
-
-          if os.path.exists("pubspec.yaml"):
-              with open("pubspec.yaml", "r", encoding="utf-8") as f:
-                  lines = f.readlines()
-              with open("pubspec.yaml", "w", encoding="utf-8") as f:
-                  for line in lines:
-                      if "text_to_speech" not in line:
-                          f.write(line)
-
-          for filepath in glob.glob("lib/**/*.dart", recursive=True):
-              with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
-                  lines = f.readlines()
-              
-              new_lines = []
-              for line in lines:
-                  if any(k in line.lower() for k in ["text_to_speech", "fluttertts", "tts"]):
-                      new_lines.append("// " + line.strip() + " // removed\n")
-                  else:
-                      new_lines.append(line)
-              
-              with open(filepath, "w", encoding="utf-8") as f:
-                  f.writelines(new_lines)
-          '
+          if [ -f "android/app/google-services.json" ]; then
+            cp android/app/google-services.json /tmp/google-services.json
+          fi
+          rm -rf android
+          flutter create . --platforms=android --org com.example
+          mkdir -p android/app
+          if [ -f "/tmp/google-services.json" ]; then
+            cp /tmp/google-services.json android/app/google-services.json
+          fi
 
       - name: Install dependencies
         run: flutter pub get
